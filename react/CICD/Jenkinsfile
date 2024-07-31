@@ -38,17 +38,14 @@ pipeline {
                     if (changes || !cacheExists) {
                         echo 'package.json이 변경되었거나 캐시가 없습니다. 의존성을 새로 설치합니다.'
                         sh "rm -rf ${CACHE_DIR}"
-                        sh 'npm install -g pnpm'
-                        sh 'pnpm install'
+                        sh 'npm install'
                         
                         // 새로 설치한 node_modules를 캐시
                         sh "mkdir -p ${CACHE_DIR}"
                         sh "cp -R node_modules ${CACHE_DIR}/"
-                        sh "cp pnpm-lock.yaml ${CACHE_DIR}/"
                     } else {
                         echo '캐시된 node_modules를 사용합니다.'
                         sh "cp -R ${CACHE_DIR}/node_modules ."
-                        sh "cp ${CACHE_DIR}/pnpm-lock.yaml ."
                     }
                 }             
             }
@@ -57,7 +54,7 @@ pipeline {
         stage('pnpm run build') {
             steps {
                 // 프로젝트 빌드
-                sh 'pnpm run build'
+                sh 'npm run build'
             }                
         }
 
