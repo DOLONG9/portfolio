@@ -61,26 +61,22 @@ pipeline {
         stage('portfolio 이미지 빌드') {
             steps {
                 script {
-                    // build 된 결과물을 ./docker_build로 복사
-                    // sh "mkdir -p docker_build"
-                    // sh "cp -r $WORKSPACE/.next ."  
-
+                    // build 된 결과물을 . 으로로 복사
+                    sh "cp -r $WORKSPACE/.build ."  
 
                     // 현재 디렉토리 내용 확인
                     sh "ls -la"
                     
                     // nginx.conf 파일 복사
-                    // sh "cp CICD/nginx/nginx.conf ."
-
+                    sh "cp CICD/nginx/nginx.conf ."
 
                     docker.withRegistry("http://${DOCKER_REGISTRY_URL}", "${HARBOR_CREDENTIAL}") {
-                        def customImage = docker.build("donggu-private-project-1/nextjs-react:${env.BUILD_NUMBER}", "-f CICD/Dockerfile/Dockerfile1 .")
+                        def customImage = docker.build("donggu-portfolio/frontend:${env.BUILD_NUMBER}", "-f CICD/Dockerfile/Dockerfile1 .")
                         customImage.push()
                     }
                 }
             }
         }
-
 
         stage('test용 이미지 빌드') {
             steps {
@@ -93,26 +89,26 @@ pipeline {
             }
         }
 
-        stage('Update Manifests for donggu-1') {
+        stage('Update Manifests for frontend') {
             steps {
                 script { 
                     // Git repository information for manifests
-                    def manifestsRepoUrl = 'https://github.com/Donggu-private-project-1/deploy-argocd.git'
-                    def manifestsRepoBranch = 'main'
+                    def manifestsRepoUrl = 'https://github.com/DOLONG9/portfolio.git'
+                    def manifestsRepoBranch = 'deploy'
                     
                     // Checkout manifests repository
                     git credentialsId: "${HARBOR_CREDENTIAL}", url: manifestsRepoUrl, branch: manifestsRepoBranch
                     sh """
-                        git pull origin main
-                        sed -i 's|harbor.dorong9.com/donggu-private-project-1/nextjs-react:.*|harbor.dorong9.com/donggu-private-project-1/nextjs-react:${env.BUILD_NUMBER}|' donggu-1/web/donggu-1-nginx.yaml
+                        git pull origin deploy
+                        sed -i 's|harbor.dorong9.com/donggu-portfolio/frontend:.*|harbor.dorong9.com/donggu-portfolio/frontend:${env.BUILD_NUMBER}|' donggu-1/web/donggu-1-nginx.yaml
                         git add donggu-1/web/donggu-1-nginx.yaml
                         git config user.name 'DOLONG9'
                         git config user.email "${GIT_USER_EMAIL}"
                         git commit -m 'donggu-1/web/donggu-1-nginx.yaml ${currentBuild.number} image versioning'
                     """
                     withCredentials([gitUsernamePassword(credentialsId: "${GIT_CREDENTIAL}")]) {
-                       sh "git remote set-url origin https://github.com/Donggu-private-project-1/deploy-argocd.git" 
-                       sh "git push origin main"
+                       sh "git remote set-url origin https://github.com/DOLONG9/portfolio.git" 
+                       sh "git push origin deploy"
                     }
                 }
             }
@@ -122,13 +118,13 @@ pipeline {
             steps {
                 script { 
                     // Git repository information for manifests
-                    def manifestsRepoUrl = 'https://github.com/Donggu-private-project-1/deploy-argocd.git'
-                    def manifestsRepoBranch = 'main'
+                    def manifestsRepoUrl = 'https://github.com/DOLONG9/portfolio.git'
+                    def manifestsRepoBranch = 'deploy'
                     
                     // Checkout manifests repository
                     git credentialsId: "${HARBOR_CREDENTIAL}", url: manifestsRepoUrl, branch: manifestsRepoBranch
                     sh """
-                        git pull origin main
+                        git pull origin deploy
                         sed -i 's|harbor.dorong9.com/donggu-private-project-1/test:.*|harbor.dorong9.com/donggu-private-project-1/test:${env.BUILD_NUMBER}|' test/web/test-nginx.yaml
                         git add test/web/test-nginx.yaml
                         git config user.name 'DOLONG9'
@@ -136,8 +132,8 @@ pipeline {
                         git commit -m 'test/web/test-nginx.yaml ${currentBuild.number} image versioning'
                     """
                     withCredentials([gitUsernamePassword(credentialsId: "${GIT_CREDENTIAL}")]) {
-                       sh "git remote set-url origin https://github.com/Donggu-private-project-1/deploy-argocd.git" 
-                       sh "git push origin main"
+                       sh "git remote set-url origin https://github.com/DOLONG9/portfolio.git" 
+                       sh "git push origin deploy"
                     }
                 }
             }
@@ -153,8 +149,11 @@ pipeline {
                         webhookURL: env.DISCORD_WEBHOOK
             script {
                 // Docker 이미지 삭제
-                sh "docker rmi mannazo/mannazu-nextjs:${env.BUILD_NUMBER}"
-                sh "docker rmi ${DOCKER_REGISTRY_URL}/mannazo/mannazu-nextjs:${env.BUILD_NUMBER}"
+                sh "docker rmi donggu-portfolio/frontend:${env.BUILD_NUMBER}"
+                sh "docker rmi ${DOCKER_REGISTRY_URL}/donggu-portfolio/frontend:${env.BUILD_NUMBER}"
+
+                sh "docker rmi donggu-private-project-1/test:${env.BUILD_NUMBER}"
+                sh "docker rmi ${DOCKER_REGISTRY_URL}/donggu-private-project-1/test:${env.BUILD_NUMBER}"            
             }                        
         }
         failure {
@@ -168,7 +167,6 @@ pipeline {
         }
         always {
             echo 'Workspace 정리..'
-            // node_modules와 pnpm-lock.yaml을 제외한 모든 파일 삭제
             deleteDir() // 워크스페이스의 모든 내용을 삭제
         }
     }
