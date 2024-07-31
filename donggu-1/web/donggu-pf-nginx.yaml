@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: donggu-pf-nginx
-        image: harbor.dorong9.com/donggu-private-project-1/nextjs-react:49
+        image: harbor.dorong9.com/donggu-portfolio/frontend:49
         ports:
         - containerPort: 80
         resources:
@@ -31,7 +31,6 @@ spec:
   strategy:
     canary:
       canaryService: donggu-pf-nginx-canary
-      stableService: donggu-pf-nginx-stable    
       steps:
       - setWeight: 50
       - pause: {duration: 1m}
@@ -41,7 +40,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: donggu-pf-nginx-stable
+  name: donggu-pf-nginx
   namespace: donggu-pf
 spec:
   ports:
@@ -50,7 +49,6 @@ spec:
       targetPort: 3000
   selector:
     app: donggu-pf-nginx
-
 ---
 apiVersion: v1
 kind: Service

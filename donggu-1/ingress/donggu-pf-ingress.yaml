@@ -15,7 +15,7 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: donggu-pf-nginx-stable
+              name: donggu-pf-nginx
               port:
                 number: 80
 
