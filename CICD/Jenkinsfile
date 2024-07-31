@@ -19,7 +19,7 @@ pipeline {
             steps {
                 script {
                     // Discord 빌드 시작 메시지 보내기
-                    discordSend title: "동구 포트폴리오(React_version)", 
+                    discordSend title: "동구 포트폴리오(React)", 
                                 description: "빌드 시작!!",
                                 link: env.BUILD_URL, result: currentBuild.currentResult, 
                                 webhookURL: env.DISCORD_WEBHOOK
@@ -146,7 +146,7 @@ pipeline {
 
     post {
         success {
-            discordSend title: "Mannazu-nextjs", 
+            discordSend title: "동구 포트폴리오(React)", 
                         description: "빌드 성공!!",            
                         footer: "젠킨스에서 확인하세요", 
                         link: env.BUILD_URL, result: currentBuild.currentResult, 
@@ -159,7 +159,7 @@ pipeline {
         }
         failure {
             script {
-                discordSend title: "Mannazu-nextjs", 
+                discordSend title: "동구 포트폴리오(React)", 
                             description: "빌드 실패!!",
                             footer: "젠킨스에서 확인하세요", 
                             link: env.BUILD_URL, result: currentBuild.currentResult, 
