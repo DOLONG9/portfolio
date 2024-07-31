@@ -2,10 +2,10 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_REGISTRY_URL = "${params.harbor_url}"
-        HARBOR_CREDENTIAL = "${params.harbor_credential}"
-        GIT_USER_EMAIL = "${params.git_user_email}"
-        GIT_CREDENTIAL = "${params.github_credential}"
+        DOCKER_REGISTRY_URL = credentials('DOCKER_REGISTRY_URL_ID')
+        HARBOR_CREDENTIAL = credentials('HARBOR_CREDENTIAL_ID')
+        GIT_USER_EMAIL = credentials('GIT_USER_EMAIL_ID')
+        GIT_CREDENTIAL = credentials('GIT_CREDENTIAL_ID')
         DISCORD_WEBHOOK = credentials("Donggu-portfolio-webhook")    
         CACHE_DIR = "/var/jenkins_home/npm_cache/dorong9-react-portfolio"
     }
