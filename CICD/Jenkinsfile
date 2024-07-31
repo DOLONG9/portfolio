@@ -51,7 +51,6 @@ pipeline {
             }
         }
 
-
         stage('pnpm run build') {
             steps {
                 // 프로젝트 빌드
