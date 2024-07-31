@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-nginx
+  namespace: test
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1  # 보관할 ReplicaSet의 수를 3로 제한
+  selector:
+    matchLabels:
+      app: test-nginx
+  template:
+    metadata:
+      labels:
+        app: test-nginx
+    spec:
+      containers:
+      - name: test-nginx
+        image: harbor.dorong9.com/donggu-private-project-1/test:49
+        ports:
+        - containerPort: 80
+      imagePullSecrets:
+      - name: test-regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-nginx
+  namespace: test
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  selector:
+    app: test-nginx

@@ -1,0 +1,66 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: donggu-pf-nginx
+  namespace: donggu-pf
+spec:
+  replicas: 1  # HPA의 minReplicas와 일치시킵니다
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: donggu-pf-nginx
+  template:
+    metadata:
+      labels:
+        app: donggu-pf-nginx
+    spec:
+      containers:
+      - name: donggu-pf-nginx
+        image: harbor.dorong9.com/donggu-private-project-1/nextjs-react:49
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "100m"
+            memory: "128Mi"
+      imagePullSecrets:
+      - name: donggu-pf-regcred
+  strategy:
+    canary:
+      canaryService: donggu-pf-nginx-canary
+      stableService: donggu-pf-nginx-stable    
+      steps:
+      - setWeight: 50
+      - pause: {duration: 1m}
+      maxSurge: "50%"
+      maxUnavailable: 0
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: donggu-pf-nginx-stable
+  namespace: donggu-pf
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  selector:
+    app: donggu-pf-nginx
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: donggu-pf-nginx-canary
+  namespace: donggu-pf
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  selector:
+    app: donggu-pf-nginx

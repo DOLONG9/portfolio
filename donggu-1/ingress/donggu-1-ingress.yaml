@@ -1,0 +1,44 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: donggu-ingress
+  namespace: donggu-pf
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: www.dorong9.com
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: donggu-pf-nginx-stable
+              port:
+                number: 80
+
+# 카나리 테스트용
+    - host: canary.dorong9.com
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: donggu-pf-nginx-canary
+              port:
+               number: 80
+
+# api 서버
+    - host: api.dorong9.com
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: donggu-pf-tomcat
+              port:
+                number: 8080
