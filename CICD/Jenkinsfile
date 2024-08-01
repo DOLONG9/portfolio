@@ -51,9 +51,10 @@ pipeline {
             }
         }
 
-        stage('pnpm run build') {
+        stage('npm run build') {
             steps {
                 // 프로젝트 빌드
+                sh 'export NODE_OPTIONS=--openssl-legacy-provider'
                 sh 'npm run build'
             }                
         }
